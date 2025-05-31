@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>ТРСПО Тест</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px auto;
+            max-width: 600px;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+        }
+        .result {
+            margin-top: 20px;
+        }
+        .qa {
+            background: #f1f1f1;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-left: 4px solid #4CAF50;
+        }
+    </style>
+</head>
+<body>
+<h2>Пошук відповіді ТРСПО</h2>
+<input type="text" id="questionInput" placeholder="Введіть частину питання..." oninput="searchQuestion()">
+<div id="results" class="result"></div>
+
+<script>
+    let qaList = [];
+
+    // Завантаження даних із текстового файлу
+    fetch('trspo.txt')
+        .then(response => response.text())
+        .then(text => {
+            const entries = text.trim().split(/\n\s*\n/); // Розділяємо за порожніми рядками
+            entries.forEach(entry => {
+                const lines = entry.trim().split('\n');
+                if (lines.length >= 2) {
+                    qaList.push({
+                        question: lines[0].trim(),
+                        answer: lines.slice(1).join('\n').trim()
+                    });
+                }
+            });
+        })
+        .catch(error => {
+            console.error("Помилка при завантаженні data.txt:", error);
+        });
+
+    function searchQuestion() {
+        const input = document.getElementById("questionInput").value.toLowerCase();
+        const resultsDiv = document.getElementById("results");
+        resultsDiv.innerHTML = "";
+
+        const matches = qaList.filter(qa => qa.question.toLowerCase().includes(input));
+
+        if (matches.length > 0) {
+            matches.forEach(qa => {
+                const div = document.createElement("div");
+                div.className = "qa";
+                div.innerHTML = `<strong>${qa.question}</strong><br>${qa.answer}`;
+                resultsDiv.appendChild(div);
+            });
+        } else if (input.trim().length > 0) {
+            resultsDiv.innerHTML = "<p>Нічого не знайдено.</p>";
+        }
+    }
+</script>
+</body>
+</html>
